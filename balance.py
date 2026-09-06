@@ -619,7 +619,6 @@ async def key_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 async def delkey_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Elimina una key y revoca premium si fue usada"""
     user_id = update.effective_user.id
     if not is_admin(user_id):
         await update.message.reply_text("⛔ <b>NO AUTORIZADO</b>", parse_mode='HTML')
@@ -641,7 +640,6 @@ async def delkey_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     used_by = key_data.get('used_by')
     
-    # Eliminar la key
     db.keys.delete_one({"key": key})
     
     mensaje = [
@@ -651,11 +649,9 @@ async def delkey_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"<b>📅 Expiraba</b>: {key_data['expires_at'].strftime('%d/%m/%Y %H:%M')}"
     ]
     
-    # Si la key fue usada, revocar premium y mostrar usuario
     if used_by:
         user = db.query_user(used_by)
         if user:
-            # Revocar premium
             db.user.update_one(
                 {"id": used_by},
                 {"$set": {"premium_until": None, "role": "free"}}
@@ -663,7 +659,6 @@ async def delkey_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             mensaje.append(f"\n<b>👤 Usuario</b>: @{user.get('username', 'None')} (ID: {used_by})")
             mensaje.append("<b>🔄 Premium revocado</b>")
             
-            # Notificar al usuario
             try:
                 await context.bot.send_message(
                     used_by,
@@ -883,7 +878,7 @@ async def bloques_dot_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
     await bloques_command(update, context)
 
 # ==================== MAIN ====================
-def main():
+async def main():
     application = Application.builder().token(BOT_TOKEN).build()
 
     application.add_handler(CommandHandler("start", start_command))
@@ -926,7 +921,10 @@ def main():
     print("Admin ID: 1233826268")
     print("="*60)
     
-    application.run_polling(allowed_updates=Update.ALL_TYPES)
+    await application.initialize()
+    await application.start()
+    await application.updater.start_polling(allowed_updates=Update.ALL_TYPES)
+    await asyncio.Event().wait()
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
