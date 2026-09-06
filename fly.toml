@@ -1,0 +1,8 @@
+app = "telcel-bot"
+primary_region = "iad"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  BOT_TOKEN = "878184436
