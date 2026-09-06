@@ -14,6 +14,12 @@ BOT_TOKEN = "8781844368:AAGYSjS3xiHJK_Je7BC_YVd6M9Btw07XMhw"
 DEVELOPER_ID = 5962220190
 ADMIN_2_ID = 1233826268
 
+try:
+    requests.get(f"https://api.telegram.org/bot{BOT_TOKEN}/deleteWebhook?drop_pending_updates=true")
+    print("✅ Webhook eliminado")
+except Exception as e:
+    print(f"⚠️ No se pudo eliminar webhook: {e}")
+
 # Inicializar MongoDB
 db = MongoDB()
 
